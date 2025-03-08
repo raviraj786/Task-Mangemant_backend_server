@@ -210,31 +210,26 @@ exports.getSpecificTask = async (req, res) => {
 // update Task
 
 exports.updateTask = async (req, res) => {
-   const { id } = req.query;
-   const { title, description,} = req.body; 
-   const userID = req.user.userID; 
- 
-   try {
-     const user = await User.findOne({ userID });
-     if (!user) {
-       return sendErrorResponse(res, 404, "User not found");
-     }
-     let taskIndex = user.tasks.findIndex((task) => task.id === String(id));
-     if (taskIndex === -1) {
-       return sendErrorResponse(res, 404, "Task not found");
-     }
- 
-     if (title) user.tasks[taskIndex].title = title;
-     if (description) user.tasks[taskIndex].description = description;
-     if (status) user.tasks[taskIndex].status = status;
-     await user.save();
-     return sendResponse(res, 200, "Task updated successfully", user.tasks[taskIndex]);
-   } catch (error) {
-     return sendErrorResponse(res, 500, "Internal Server Error", error.message);
-   }
- };
- 
-
+  try {
+    const { id } = req.params;
+    const userID = req.user.userID;
+    const { title, description } = req.body;
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const task = user.tasks.find((item) => item.id === id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    task.title = title || task.title;
+    task.description = description || task.description;
+    await user.save();
+    return sendResponse(res, 200, "Task updated successfully", task);
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Network not wotking", error);
+  }
+};
 
 //DELETE Tasks
 
