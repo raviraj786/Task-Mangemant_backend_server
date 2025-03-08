@@ -3,8 +3,8 @@ const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
-    userID: { type: String, required: true , unique:true },
-    username : { type: String, required: true },
+    userID: { type: String, required: true, unique: true },
+    username: { type: String, required: true },
     email: {
       type: String,
       required: true,
@@ -16,21 +16,15 @@ const userSchema = new mongoose.Schema(
       },
     },
     password: { type: String, required: true },
-    token: { type: String, default: null },
     status: {
       type: String,
       default: "offline",
     },
     tasks: [
       {
-        taskid: { type: String, default: null },
+        id: { type: String, default: null },
         title: { type: String, default: null },
         description: { type: String, default: null },
-        status: {
-          type: String,
-          default: "pending",
-          enum: ["pending", "in-progress", "completed"],
-        },
       },
     ],
   },

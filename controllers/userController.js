@@ -66,7 +66,7 @@ exports.loginuser = async (req, res) => {
     });
     return sendResponse(res, 200, "Login successfull", { user, token });
   } catch (error) {
-    return sendErrorResponse(res, 500, err.message || "Internat Sever Error");
+    return sendErrorResponse(res, 500, error.message || "Internat Sever Error");
   }
 };
 
@@ -162,7 +162,7 @@ exports.addTasks = async (req, res) => {
       return sendErrorResponse(res, 404, "User not found");
     }
     const newTask = {
-      taskid: uid(11),
+      id: uid(),
       title,
       description,
     };
@@ -176,18 +176,95 @@ exports.addTasks = async (req, res) => {
 
 exports.getAllTasks = async (req, res) => {
   const userID = req.user.userID;
-
   try {
     const tasks = await User.findOne({ userID });
     if (!tasks) {
       return sendErrorResponse(res, 401, "UserID not found");
     }
-    console.log(tasks.tasks);
-
     return sendResponse(res, 200, "Task fetch Scussfull", {
       Tasks: tasks.tasks,
     });
   } catch (error) {
     return sendErrorResponse(res, 500, "error", error);
+  }
+};
+
+exports.getSpecificTask = async (req, res) => {
+  const { id } = req.params;
+  const userID = req.user.userID;
+
+  try {
+    const user = await User.findOne({ userID });
+    const task = user.tasks.filter((item) => item.id === id);
+    console.log(task.length);
+
+    if (!task || task.length >= 0) {
+      return sendErrorResponse(res, 404, "Task ID not found");
+    }
+    return sendResponse(res, 200, "Task found successfully", task);
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Task not found", error);
+  }
+};
+
+// update Task
+
+exports.updateTask = async (req, res) => {
+   const { id } = req.query;
+   const { title, description,} = req.body; 
+   const userID = req.user.userID; 
+ 
+   try {
+     const user = await User.findOne({ userID });
+     if (!user) {
+       return sendErrorResponse(res, 404, "User not found");
+     }
+     let taskIndex = user.tasks.findIndex((task) => task.id === String(id));
+     if (taskIndex === -1) {
+       return sendErrorResponse(res, 404, "Task not found");
+     }
+ 
+     if (title) user.tasks[taskIndex].title = title;
+     if (description) user.tasks[taskIndex].description = description;
+     if (status) user.tasks[taskIndex].status = status;
+     await user.save();
+     return sendResponse(res, 200, "Task updated successfully", user.tasks[taskIndex]);
+   } catch (error) {
+     return sendErrorResponse(res, 500, "Internal Server Error", error.message);
+   }
+ };
+ 
+
+
+//DELETE Tasks
+
+exports.deleteTask = async (req, res) => {
+  const { id } = req.params;
+  const userID = req.user.userID;
+  try {
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return sendErrorResponse(res, 404, "User not found");
+    }
+
+    const taskExists = user.tasks.some((task) => task.id === String(id));
+    if (!taskExists) {
+      return sendErrorResponse(res, 404, "Task not found");
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { userID },
+      { $pull: { tasks: { id: String(id) } } },
+      { new: true }
+    );
+
+    return sendResponse(
+      res,
+      200,
+      "Task deleted successfully",
+      updatedUser.tasks
+    );
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal Server Error", error.message);
   }
 };
