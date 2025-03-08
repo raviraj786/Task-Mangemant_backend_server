@@ -4,7 +4,7 @@ require("dotenv").config();
 
 const MONGO_URI = process.env.MONGO_URI;
 
-console.log(MONGO_URI , "kkkk")
+
 
 if (!MONGO_URI) {
   console.error("MongoDB connection URI is missing!");
