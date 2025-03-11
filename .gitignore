@@ -9,8 +9,8 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps/
-nodeModules/
-.env
-.env
-package-lock.json/
+
+node_modules/    # 'nodeModules' galat hai. Sahi naam 'node_modules' hai.
 package-lock.json
+
+.env
