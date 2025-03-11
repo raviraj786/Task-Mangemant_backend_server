@@ -94,27 +94,44 @@ exports.forgetPassword = async (req, res) => {
     if (!user) {
       return sendErrorResponse(res, 404, "User not found");
     }
+
     const otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       specialChars: false,
     });
+
     otpStore[email] = { otp, expiresAt: Date.now() + 10 * 60 * 1000 };
     const transporter = nodemailer.createTransport({
       service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
-        Pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS,
       },
     });
+
+    
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "password Reset OTP",
-      text: `Your OTP for Password reset is: ${otp},it is valid for 10 minuts `,
+      subject: "Password Reset OTP",
+      text: `Your OTP for Password reset is: ${otp}. It is valid for 10 minutes.`,
+      html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>
+             <p>It is valid for <em>10 minutes</em>.</p>`
     };
-    9;
+    
     await transporter.sendMail(mailOptions);
+    transporter.verify((error, success) => {
+      if (error) {
+        console.error("Transporter verification error:", error);
+      } else {
+        console.log("Server is ready to take our messages:", success);
+      }
+    });
+    
     return res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
     return sendErrorResponse(res, 400, error);
@@ -177,12 +194,16 @@ exports.addTasks = async (req, res) => {
 exports.getAllTasks = async (req, res) => {
   const userID = req.user.userID;
   try {
-    const tasks = await User.findOne({ userID });
-    if (!tasks) {
+    const user = await User.findOne({ userID });
+    if (!user) {
       return sendErrorResponse(res, 401, "UserID not found");
     }
+    if (!user.tasks || user.tasks.length === 0) {
+      return sendErrorResponse(res, 404, "No tasks found");
+    }
+
     return sendResponse(res, 200, "Task fetch Scussfull", {
-      Tasks: tasks.tasks,
+      Tasks: user.tasks,
     });
   } catch (error) {
     return sendErrorResponse(res, 500, "error", error);
@@ -195,11 +216,10 @@ exports.getSpecificTask = async (req, res) => {
 
   try {
     const user = await User.findOne({ userID });
+    clg
     const task = user.tasks.filter((item) => item.id === id);
-    console.log(task.length);
-
-    if (!task || task.length >= 0) {
-      return sendErrorResponse(res, 404, "Task ID not found");
+    if (!user.tasks || user.tasks.length === 0) {
+      return sendErrorResponse(res, 404, "No tasks found");
     }
     return sendResponse(res, 200, "Task found successfully", task);
   } catch (error) {
