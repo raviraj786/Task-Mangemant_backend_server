@@ -1,10 +1,7 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 require("dotenv").config();
 
-
 const MONGO_URI = process.env.MONGO_URI;
-
-
 
 if (!MONGO_URI) {
   console.error("MongoDB connection URI is missing!");
@@ -12,16 +9,15 @@ if (!MONGO_URI) {
 }
 
 const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(MONGO_URI ,{
-         useNewUrlParser : true,
-         useUnifiedTopology : true
-        })
-        console.log(process.env.MONGO_URL)
-    } catch (error) {
-        console.error("Mongodb Connected Failed" , error)
-    }
-}
-
+  try {
+    await mongoose.connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(process.env.MONGO_URL);
+  } catch (error) {
+    console.error("Mongodb Connected Failed", error);
+  }
+};
 
 module.exports = connectMongoDB;

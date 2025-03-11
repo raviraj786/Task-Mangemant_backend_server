@@ -112,17 +112,15 @@ exports.forgetPassword = async (req, res) => {
       },
     });
 
-    
-
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Password Reset OTP",
       text: `Your OTP for Password reset is: ${otp}. It is valid for 10 minutes.`,
       html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>
-             <p>It is valid for <em>10 minutes</em>.</p>`
+             <p>It is valid for <em>10 minutes</em>.</p>`,
     };
-    
+
     await transporter.sendMail(mailOptions);
     transporter.verify((error, success) => {
       if (error) {
@@ -131,7 +129,7 @@ exports.forgetPassword = async (req, res) => {
         console.log("Server is ready to take our messages:", success);
       }
     });
-    
+
     return res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
     return sendErrorResponse(res, 400, error);
@@ -166,7 +164,6 @@ exports.resetPassword = async (req, res) => {
 };
 
 // add Task
-
 exports.addTasks = async (req, res) => {
   const { title, description } = req.body;
   const userID = req.user.userID;
@@ -213,10 +210,8 @@ exports.getAllTasks = async (req, res) => {
 exports.getSpecificTask = async (req, res) => {
   const { id } = req.params;
   const userID = req.user.userID;
-
   try {
     const user = await User.findOne({ userID });
-    clg
     const task = user.tasks.filter((item) => item.id === id);
     if (!user.tasks || user.tasks.length === 0) {
       return sendErrorResponse(res, 404, "No tasks found");
@@ -228,7 +223,6 @@ exports.getSpecificTask = async (req, res) => {
 };
 
 // update Task
-
 exports.updateTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -252,7 +246,6 @@ exports.updateTask = async (req, res) => {
 };
 
 //DELETE Tasks
-
 exports.deleteTask = async (req, res) => {
   const { id } = req.params;
   const userID = req.user.userID;
@@ -261,18 +254,15 @@ exports.deleteTask = async (req, res) => {
     if (!user) {
       return sendErrorResponse(res, 404, "User not found");
     }
-
     const taskExists = user.tasks.some((task) => task.id === String(id));
     if (!taskExists) {
       return sendErrorResponse(res, 404, "Task not found");
     }
-
     const updatedUser = await User.findOneAndUpdate(
       { userID },
       { $pull: { tasks: { id: String(id) } } },
       { new: true }
     );
-
     return sendResponse(
       res,
       200,

@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
         id: { type: String, default: null },
         title: { type: String, default: null },
         description: { type: String, default: null },
+        createAt: { type: Date, default: Date.now },
       },
     ],
   },
