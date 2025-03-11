@@ -12,3 +12,5 @@ _deps/
 nodeModules/
 .env
 .env
+package-lock.json/
+package-lock.json
